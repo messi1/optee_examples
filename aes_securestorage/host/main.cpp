@@ -25,8 +25,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <err.h>
 #include <iostream>
+#include <err.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -37,75 +37,100 @@
 /**
  * @brief Display program usage
  */
-void displayUsage() {
-  std::cerr
-      << "Usage:\n"
-         "  aes_secure_storage genkey <key_id>\n"
-         "  aes_secure_storage setkey <key_id> <hex_key>\n"
-         "  aes_secure_storage getkey <key_id>\n"
-         "  aes_secure_storage delkey <key_id>\n"
-         "  aes_secure_storage encrypt <key_id> <input_file> <output_file>\n"
-         "  aes_secure_storage decrypt <key_id> <input_file> <output_file>\n"
-         "\n"
-         "Examples:\n"
-         "  aes_secure_storage genkey key1\n"
-         "  aes_secure_storage setkey key1 00112233445566778899AABBCCDDEEFF\n"
-         "  aes_secure_storage getkey key1\n"
-         "  aes_secure_storage delkey key1\n"
-         "  aes_secure_storage encrypt key1 plain.txt cipher.bin\n"
-         "  aes_secure_storage decrypt key1 cipher.bin decrypted.txt\n";
-  std::exit(1);
+void displayUsage()
+{
+    std::cerr << "Usage:\n"
+                 "  optee_example_aes_securestorage genkey <key_id>\n"
+                 "  optee_example_aes_securestorage setkey <key_id> <hex_key>\n"
+                 "  optee_example_aes_securestorage getkey <key_id>\n"
+                 "  optee_example_aes_securestorage delkey <key_id>\n"
+                 "  optee_example_aes_securestorage encrypt <key_id> <input_file> "
+                 "<output_file>\n"
+                 "  optee_example_aes_securestorage decrypt <key_id> <input_file> "
+                 "<output_file>\n"
+                 "\n"
+                 "Examples:\n"
+                 "  optee_example_aes_securestorage genkey key1\n"
+                 "  optee_example_aes_securestorage setkey key1 "
+                 "00112233445566778899AABBCCDDEEFF\n"
+                 "  optee_example_aes_securestorage getkey key1\n"
+                 "  optee_example_aes_securestorage delkey key1\n"
+                 "  optee_example_aes_securestorage encrypt key1 plain.txt cipher.bin\n"
+                 "  optee_example_aes_securestorage decrypt key1 cipher.bin "
+                 "decrypted.txt\n";
+    std::exit( 1 );
 }
 
-int main(int argc, char *argv[]) {
-  try {
-    // Check arguments
-    if (argc < 3) {
-      displayUsage();
+int main( int argc, char* argv[] )
+{
+    try
+    {
+        // Check arguments
+        if ( argc < 3 )
+        {
+            displayUsage();
+        }
+
+        // Parse command
+        std::string command = argv[1];
+        std::string key_id  = argv[2];
+
+        // Initialize client
+        AesSecureStorageFacade client;
+
+        // Process command
+        if ( command == "genkey" )
+        {
+            if ( argc != 3 )
+                displayUsage();
+            client.generateKey( key_id );
+        }
+        else if ( command == "setkey" )
+        {
+            if ( argc != 4 )
+                displayUsage();
+            client.setKey( key_id, argv[3] );
+        }
+        else if ( command == "getkey" )
+        {
+            if ( argc != 3 )
+                displayUsage();
+            auto key = client.getKey( key_id );
+            std::cout << "Get key: " << key << "\n";
+        }
+        else if ( command == "delkey" )
+        {
+            if ( argc != 3 )
+                displayUsage();
+            client.deleteKey( key_id );
+        }
+        else if ( command == "encrypt" )
+        {
+            if ( argc != 5 )
+                displayUsage();
+            client.encryptFile( key_id, argv[3], argv[4] );
+        }
+        else if ( command == "decrypt" )
+        {
+            if ( argc != 5 )
+                displayUsage();
+            client.decryptFile( key_id, argv[3], argv[4] );
+        }
+        else
+        {
+            displayUsage();
+        }
+    }
+    catch ( const OpTeeException& e )
+    {
+        std::cerr << "OP-TEE Error: " << e.what() << "\n";
+        return 1;
+    }
+    catch ( const std::exception& e )
+    {
+        std::cerr << "Error: " << e.what() << "\n";
+        return 1;
     }
 
-    // Parse command
-    std::string command = argv[1];
-    std::string key_id = argv[2];
-
-    // Initialize client
-    AesSecureStorageFacade client;
-
-    // Process command
-    if (command == "genkey") {
-      if (argc != 3)
-        displayUsage();
-      client.generateKey(key_id);
-    } else if (command == "setkey") {
-      if (argc != 4)
-        displayUsage();
-      client.setKey(key_id, argv[3]);
-    } else if (command == "getkey") {
-      if (argc != 3)
-        displayUsage();
-      client.getKey(key_id);
-    } else if (command == "delkey") {
-      if (argc != 3)
-        displayUsage();
-      client.deleteKey(key_id);
-    } else if (command == "encrypt") {
-      if (argc != 5)
-        displayUsage();
-      client.encryptFile(key_id, argv[3], argv[4]);
-    } else if (command == "decrypt") {
-      if (argc != 5)
-        displayUsage();
-      client.decryptFile(key_id, argv[3], argv[4]);
-    } else {
-      displayUsage();
-    }
-  } catch (const OpTeeException &e) {
-    std::cerr << "OP-TEE Error: " << e.what() << "\n";
-    return 1;
-  } catch (const std::exception &e) {
-    std::cerr << "Error: " << e.what() << "\n";
-    return 1;
-  }
-
-  return 0;
+    return 0;
 }
