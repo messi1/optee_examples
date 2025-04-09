@@ -79,7 +79,7 @@ static TEE_Result generate_and_store_key(uint32_t param_types,
 
   /* Extract the key value from the transient object */
   TEE_GetObjectBufferAttribute(transient_obj, TEE_ATTR_SECRET_VALUE, key_data,
-                               &(size_t){AES_KEY_SIZE});
+                               &(uint32_t){AES_KEY_SIZE});
 
   /* Create or open the persistent object for the key */
   res = TEE_CreatePersistentObject(
@@ -186,7 +186,8 @@ static TEE_Result get_key(uint32_t param_types, TEE_Param params[4]) {
     goto exit;
 
   /* Read the key data */
-  res = TEE_ReadObjectData(key_obj, key_data, AES_KEY_SIZE, &key_data_len);
+  res = TEE_ReadObjectData(key_obj, key_data, AES_KEY_SIZE,
+                           &(uint32_t){key_data_len});
   if (res != TEE_SUCCESS || key_data_len != AES_KEY_SIZE)
     goto exit;
 
@@ -261,7 +262,8 @@ static TEE_Result init_aes_ctr_context(const char *key_id, size_t key_id_len,
     goto exit;
 
   /* Read the key data */
-  res = TEE_ReadObjectData(key_obj, key_data, key_data_len, &key_data_len);
+  res = TEE_ReadObjectData(key_obj, key_data, key_data_len,
+                           &(uint32_t){key_data_len});
   if (res != TEE_SUCCESS || key_data_len != AES_KEY_SIZE)
     goto exit;
 
@@ -292,9 +294,7 @@ static TEE_Result init_aes_ctr_context(const char *key_id, size_t key_id_len,
     goto exit;
 
   /* Generate a random initialization vector */
-  res = TEE_GenerateRandom(ctx->iv, AES_KEY_SIZE);
-  if (res != TEE_SUCCESS)
-    goto exit;
+  TEE_GenerateRandom(ctx->iv, AES_KEY_SIZE);
 
 exit:
   if (key_obj != TEE_HANDLE_NULL)
@@ -366,7 +366,7 @@ static TEE_Result encrypt_file(uint32_t param_types, TEE_Param params[4]) {
 
   /* Encrypt the data */
   res = TEE_CipherDoFinal(ctx.op, in_data, in_len, out_data + AES_KEY_SIZE,
-                          &out_len);
+                          &(uint32_t){out_len});
   if (res != TEE_SUCCESS)
     goto exit;
 
@@ -424,7 +424,8 @@ static TEE_Result decrypt_file(uint32_t param_types, TEE_Param params[4]) {
     goto exit;
 
   /* Read the key data */
-  res = TEE_ReadObjectData(key_obj, key_data, key_data_len, &key_data_len);
+  res = TEE_ReadObjectData(key_obj, key_data, key_data_len,
+                           &(uint32_t){key_data_len});
   if (res != TEE_SUCCESS || key_data_len != AES_KEY_SIZE)
     goto exit;
 
@@ -463,7 +464,7 @@ static TEE_Result decrypt_file(uint32_t param_types, TEE_Param params[4]) {
   /* Decrypt the data (skipping the IV) */
   out_len = params[2].memref.size;
   res = TEE_CipherDoFinal(op, in_data + AES_KEY_SIZE, in_len - AES_KEY_SIZE,
-                          out_data, &out_len);
+                          out_data, &(uint32_t){out_len});
   if (res != TEE_SUCCESS)
     goto exit;
 

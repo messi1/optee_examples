@@ -29,18 +29,13 @@ target_sources(${PROJECT_NAME}
 		host/include/OpTeeException.h
 )
 
-# Include-Verzeichnisse
 target_include_directories(${PROJECT_NAME}
     PRIVATE
-		host/include
+	include
+	host/include
         ta/include
 )
 
-# Libraries (z.B. teec)
-target_link_libraries(${PROJECT_NAME}
-    PRIVATE
-        teec
-)
+target_link_libraries (${PROJECT_NAME} PRIVATE teec)
 
-# Installationsziel
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+install (TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})

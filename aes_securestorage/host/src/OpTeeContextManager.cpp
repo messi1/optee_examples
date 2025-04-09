@@ -4,6 +4,7 @@
 #include <stdexcept>
 OpTeeContextManager::OpTeeContextManager() {
   TEEC_Result res;
+  TEEC_UUID uuid = TA_AES_SECURE_STORAGE_UUID;
   uint32_t err_origin;
 
   res = TEEC_InitializeContext(nullptr, &context_);
@@ -13,8 +14,8 @@ OpTeeContextManager::OpTeeContextManager() {
     throw std::runtime_error(ss.str());
   }
 
-  res = TEEC_OpenSession(&context_, &session_, &TA_AES_SECURE_STORAGE_UUID,
-                         TEEC_LOGIN_PUBLIC, nullptr, nullptr, &err_origin);
+  res = TEEC_OpenSession(&context_, &session_, &uuid, TEEC_LOGIN_PUBLIC,
+                         nullptr, nullptr, &err_origin);
   if (res != TEEC_SUCCESS) {
     std::stringstream ss;
     ss << "TEEC_OpenSession failed: 0x" << std::hex << res << ", origin: 0x"

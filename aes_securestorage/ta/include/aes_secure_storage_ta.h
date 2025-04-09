@@ -1,13 +1,9 @@
 #ifndef __AES_SECURE_STORAGE_TA_H__
 #define __AES_SECURE_STORAGE_TA_H__
 
-#include "tee_client_api.h"
-
-constexpr TEEC_UUID TA_AES_SECURE_STORAGE_UUID{
-    0x5dbac793,
-    0xf574,
-    0x4871,
-    {0x8a, 0xd3, 0x04, 0x33, 0x1e, 0xc1, 0x7f, 0x25}};
+#define TA_AES_SECURE_STORAGE_UUID \
+    { 0x5dbac793, 0xf574, 0x4871, \
+      { 0x8a, 0xd3, 0x04, 0x33, 0x1e, 0xc1, 0x7f, 0x25 } }
 
 /* Command IDs */
 #define TA_AES_CMD_GENERATE_KEY 0
