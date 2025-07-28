@@ -35,7 +35,7 @@
 /* To get the TA UUID definition */
 #include <aes_secure_storage_ta.h>
 
-#define TA_UUID TA_AES_SECURE_STORAGE_UUID
+#define TA_UUID AES_SECURE_STORAGE_TA_UUID
 
 /*
  * TA properties: multi-instance TA, no specific attribute

@@ -6,7 +6,7 @@
 OpTeeContextManager::OpTeeContextManager()
 {
     TEEC_Result res;
-    TEEC_UUID   uuid = TA_AES_SECURE_STORAGE_UUID;
+    TEEC_UUID   uuid = AES_SECURE_STORAGE_TA_UUID;
     uint32_t    err_origin;
 
     res = TEEC_InitializeContext( nullptr, &context_ );

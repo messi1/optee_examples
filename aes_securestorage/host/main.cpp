@@ -37,6 +37,32 @@
 /**
  * @brief Display program usage
  */
+void printUsage( const char* progName )
+{
+    std::cerr << "Verwendung:\n"
+              << "  " << progName << " wipe_secure_storage\n"
+              << "  " << progName << " create_keyring <keyring_id>\n"
+              << "  " << progName << " delete_keyring <keyring_id>\n"
+              << "  " << progName << " keyring_exists <keyring_id>\n"
+              << "  " << progName << " add_secret <keyring_id> <key_id> <secret>\n"
+              << "  " << progName << " get_secret <keyring_id> <key_id>\n"
+              << "  " << progName << " update_secret <keyring_id> <key_id> <secret>\n"
+              << "  " << progName << " delete_secret <keyring_id> <key_id>\n"
+              << "  " << progName << " list_secrets\n"
+              << "\n"
+              << "Examples:\n"
+              << "  " << progName << " wipe_secure_storage\n"
+              << "  " << progName << " create_keyring my_ring\n"
+              << "  " << progName << " add_secret my_ring my_key geheim\n"
+              << "  " << progName << " get_secret my_ring my_key\n"
+              << "  " << progName << " update_secret my_ring my_key geheim_v2\n"
+              << "  " << progName << " delete_secret my_ring my_key\n"
+              << "  " << progName << " delete_keyring my_ring\n"
+              << "  " << progName << " keyring_exists my_ring\n"
+              << "  " << progName << " list_secrets\n";
+    std::exit( 1 );
+}
+
 void displayUsage()
 {
     std::cerr << "Usage:\n"
@@ -65,60 +91,83 @@ int main( int argc, char* argv[] )
 {
     try
     {
-        // Check arguments
-        if ( argc < 3 )
+        if ( argc < 2 )
         {
-            displayUsage();
+            printUsage( argv[0] );
+            return 1;
         }
 
-        // Parse command
-        std::string command = argv[1];
-        std::string key_id  = argv[2];
+        AesSecureStorageFacade storage;
+        std::string            cmd = argv[1];
 
-        // Initialize client
-        AesSecureStorageFacade client;
-
-        // Process command
-        if ( command == "genkey" )
+        if ( cmd == "wipe_secure_storage" )
         {
-            if ( argc != 3 )
-                displayUsage();
-            client.generateKey( key_id );
+            std::cout << ( storage.wipeSecureStorage() ? "Success" : "Failed" ) << std::endl;
         }
-        else if ( command == "setkey" )
+        else if ( cmd == "create_keyring" && argc == 3 )
         {
-            if ( argc != 4 )
-                displayUsage();
-            client.setKey( key_id, argv[3] );
+            std::cout << ( storage.createKeyring( argv[2] ) ? "Keyring created"
+                                                            : "Failed to create keyring" )
+                      << std::endl;
         }
-        else if ( command == "getkey" )
+        else if ( cmd == "delete_keyring" && argc == 3 )
         {
-            if ( argc != 3 )
-                displayUsage();
-            auto key = client.getKey( key_id );
-            std::cout << "Get key: " << key << "\n";
+            std::cout << ( storage.deleteKeyring( argv[2] ) ? "Keyring deleted"
+                                                            : "Failed to delete keyring" )
+                      << std::endl;
         }
-        else if ( command == "delkey" )
+        else if ( cmd == "keyring_exists" && argc == 3 )
         {
-            if ( argc != 3 )
-                displayUsage();
-            client.deleteKey( key_id );
+            std::cout << ( storage.keyringExists( argv[2] ) ? "Keyring exists"
+                                                            : "Keyring does not exist" )
+                      << std::endl;
         }
-        else if ( command == "encrypt" )
+        else if ( cmd == "add_secret" && argc == 5 )
         {
-            if ( argc != 5 )
-                displayUsage();
-            client.encryptFile( key_id, argv[3], argv[4] );
+            ByteArray secret( argv[4], argv[4] + strlen( argv[4] ) );
+            std::cout << ( storage.addSecret( argv[2], argv[3], secret ) ? "Secret added"
+                                                                         : "Failed to add secret" )
+                      << std::endl;
         }
-        else if ( command == "decrypt" )
+        else if ( cmd == "get_secret" && argc == 4 )
         {
-            if ( argc != 5 )
-                displayUsage();
-            client.decryptFile( key_id, argv[3], argv[4] );
+            try
+            {
+                std::string secret = storage.getSecret( argv[2], argv[3] );
+                std::cout << "Secret: " << secret << std::endl;
+            }
+            catch ( const std::exception& e )
+            {
+                std::cerr << "Error retrieving secret: " << e.what() << std::endl;
+            }
+        }
+        else if ( cmd == "update_secret" && argc == 5 )
+        {
+            ByteArray secret( argv[4], argv[4] + strlen( argv[4] ) );
+            std::cout << ( storage.updateSecret( argv[2], argv[3], secret )
+                               ? "Secret updated"
+                               : "Failed to update secret" )
+                      << std::endl;
+        }
+        else if ( cmd == "delete_secret" && argc == 4 )
+        {
+            std::cout << ( storage.deleteSecret( argv[2], argv[3] ) ? "Secret deleted"
+                                                                    : "Failed to delete secret" )
+                      << std::endl;
+        }
+        else if ( cmd == "list_secrets" )
+        {
+            std::vector<std::string> ids = storage.listSecretIds();
+            for ( const auto& id : ids )
+            {
+                std::cout << id << std::endl;
+            }
         }
         else
         {
-            displayUsage();
+            std::cerr << "Unknown or invalid command.\n";
+            printUsage( argv[0] );
+            return 1;
         }
     }
     catch ( const OpTeeException& e )

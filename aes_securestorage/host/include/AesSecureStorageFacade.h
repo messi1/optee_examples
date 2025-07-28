@@ -1,23 +1,25 @@
 #pragma once
+#include <string>
 #include "AesFileEncryptor.h"
 #include "KeyManager.h"
-#include <string>
 
-class AesSecureStorageFacade {
+class AesSecureStorageFacade
+{
 public:
-  AesSecureStorageFacade();
-
-  void generateKey(const std::string &key_id);
-  void setKey(const std::string &key_id, const std::string &hex_key);
-  std::string getKey(const std::string &key_id);
-  void deleteKey(const std::string &key_id);
-  void encryptFile(const std::string &key_id, const std::string &in_file,
-                   const std::string &out_file);
-  void decryptFile(const std::string &key_id, const std::string &in_file,
-                   const std::string &out_file);
+    AesSecureStorageFacade();
+    bool wipeSecureStorage();
+    bool createKeyring( std::string_view keyringId );
+    bool deleteKeyring( std::string_view keyringId );
+    bool keyringExists( std::string_view keyringId ) const;
+    bool addSecret( std::string_view keyringId, std::string_view keyId, const ByteArray& secret );
+    std::string              getSecret( std::string_view keyringId, std::string_view keyId );
+    bool                     updateSecret( std::string_view keyringId, std::string_view keyId,
+                                           const ByteArray& secret );
+    bool                     deleteSecret( std::string_view keyringId, std::string_view keyId );
+    std::vector<std::string> listSecretIds() const;
 
 private:
-  OpTeeContextManager ctx_;
-  KeyManager key_mgr_;
-  AesFileEncryptor file_crypto_;
+    OpTeeContextManager ctx_;
+    KeyManager          key_mgr_;
+    AesFileEncryptor    file_crypto_;
 };

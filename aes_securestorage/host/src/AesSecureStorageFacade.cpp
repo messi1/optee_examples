@@ -6,34 +6,73 @@ AesSecureStorageFacade::AesSecureStorageFacade()
 {
 }
 
-void AesSecureStorageFacade::generateKey( const std::string& key_id )
+bool AesSecureStorageFacade::wipeSecureStorage()
 {
-    key_mgr_.generateKey( key_id );
 }
 
-void AesSecureStorageFacade::setKey( const std::string& key_id, const std::string& hex_key )
+bool AesSecureStorageFacade::createKeyring( std::string_view keyringId )
 {
-    key_mgr_.setKey( key_id, hex_key );
 }
 
-std::string AesSecureStorageFacade::getKey( const std::string& key_id )
+bool AesSecureStorageFacade::deleteKeyring( std::string_view keyringId )
+{
+}
+
+bool AesSecureStorageFacade::keyringExists( std::string_view keyringId ) const
+{
+}
+
+bool AesSecureStorageFacade::addSecret( std::string_view keyringId, std::string_view keyId,
+                                        const ByteArray& secret )
+{
+}
+
+std::string AesSecureStorageFacade::getSecret( std::string_view keyringId, std::string_view keyId )
 {
     return key_mgr_.getKey( key_id );
 }
 
-void AesSecureStorageFacade::deleteKey( const std::string& key_id )
+bool AesSecureStorageFacade::updateSecret( std::string_view keyringId, std::string_view keyId,
+                                           const ByteArray& secret )
 {
-    key_mgr_.deleteKey( key_id );
 }
 
-void AesSecureStorageFacade::encryptFile( const std::string& key_id, const std::string& in_file,
-                                          const std::string& out_file )
+bool AesSecureStorageFacade::deleteSecret( std::string_view keyringId, std::string_view keyId )
 {
-    file_crypto_.encrypt( key_id, in_file, out_file );
 }
 
-void AesSecureStorageFacade::decryptFile( const std::string& key_id, const std::string& in_file,
-                                          const std::string& out_file )
+std::vector<std::string> AesSecureStorageFacade::listSecretIds() const
 {
-    file_crypto_.decrypt( key_id, in_file, out_file );
 }
+
+// void AesSecureStorageFacade::generateKey( const std::string& key_id )
+// {
+//     key_mgr_.generateKey( key_id );
+// }
+
+// void AesSecureStorageFacade::setKey( const std::string& key_id, const std::string& hex_key )
+// {
+//     key_mgr_.setKey( key_id, hex_key );
+// }
+
+// std::string AesSecureStorageFacade::getKey( const std::string& key_id )
+// {
+//     return key_mgr_.getKey( key_id );
+// }
+
+// void AesSecureStorageFacade::deleteKey( const std::string& key_id )
+// {
+//     key_mgr_.deleteKey( key_id );
+// }
+
+// void AesSecureStorageFacade::encryptFile( const std::string& key_id, const std::string& in_file,
+//                                           const std::string& out_file )
+// {
+//     file_crypto_.encrypt( key_id, in_file, out_file );
+// }
+
+// void AesSecureStorageFacade::decryptFile( const std::string& key_id, const std::string& in_file,
+//                                           const std::string& out_file )
+// {
+//     file_crypto_.decrypt( key_id, in_file, out_file );
+// }
